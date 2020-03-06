@@ -13,3 +13,7 @@ This project is based on `Swift Package Manager`.
 ### Generate Xcode Project
 
 `swift package generate-xcodeproj`
+
+## Roadmap
+
+Migrate to Linux.(Unfortunately, Alamofire not supports Linux now..)

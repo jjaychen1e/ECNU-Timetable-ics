@@ -424,8 +424,11 @@ func getICSEvent(for course: Course, with postData: [String:String]) -> [ICSEven
                         
                         let classTimeBeginDate = calendar.date(from: classTimeBeginDateComp)
                         let classTimeEndDate = calendar.date(from: classTimeEndDateComp)
-
-                        events.append(ICSEvent(startDate: classTimeBeginDate!, endDate: classTimeEndDate!, title: course.courseName, location: location, note: course.courseInstructor))
+                        
+                        let event = ICSEvent(startDate: classTimeBeginDate!, endDate: classTimeEndDate!, title: course.courseName, location: location, note: course.courseInstructor)
+                        event.setAlarm(alarm: ICSEventAlarm(trigger: 30))
+                        
+                        events.append(event)
                     }
                 }
             }

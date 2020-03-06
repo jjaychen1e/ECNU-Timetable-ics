@@ -128,6 +128,10 @@ class ICSEvent {
         self.note = note
     }
     
+    func setAlarm(alarm: ICSEventAlarm) {
+        self.alarm = alarm
+    }
+    
     func toICSDescription() -> String {
         """
         

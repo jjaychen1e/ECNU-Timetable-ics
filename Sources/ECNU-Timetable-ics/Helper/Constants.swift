@@ -12,9 +12,9 @@ import Foundation
 /// Required Packages: pytesseract, PIL
 /// brew install tesseract(macOS)
 let PYTHON3_PATH = "/Library/Frameworks/Python.framework/Versions/3.8/bin/python3.8"
-let MODULE_PATH = "/Users/jjaychen/Desktop/recognize.py"
 let TESSERACT_PATH = "/usr/local/bin/tesseract"
-let CAPTCHA_PREXFIX = "/Users/jjaychen/Desktop/"
+let TEMP_PREXFIX = "/Users/jjaychen/Desktop"
+let MODULE_PATH = TEMP_PREXFIX + "/recognize.py"
 
 let PORTAL_URL = "https://portal1.ecnu.edu.cn/cas/login?service=http://portal.ecnu.edu.cn/neusoftcas.jsp"
 let CAPTCHA_URL = "https://portal1.ecnu.edu.cn/cas/code"
@@ -25,14 +25,14 @@ let COURSE_QUERY_URL = "http://applicationnewjw.ecnu.edu.cn/eams/publicSearch!se
 /// Random file name with time and random Int value.
 /// Example: 2020-03-03-01-17-42-5-captacha.png
 var CAPTCHA_PATH: String {
-    let prefix = CAPTCHA_PREXFIX
+    let prefix = TEMP_PREXFIX
     
     let dateformatter = DateFormatter()
     dateformatter.dateFormat = "YYYY-MM-dd-HH-mm-ss"
     let randomSuffic = String(Int.random(in: 0...10))
     let suffix = dateformatter.string(from: Date()) + "-" + randomSuffic + "-captcha.png"
     
-    return  prefix + suffix
+    return  prefix + "/" + suffix
 }
 
 // MARK: Time Dictionary Constants

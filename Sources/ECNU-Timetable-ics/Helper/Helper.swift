@@ -1,6 +1,6 @@
 //
 //  Helper.swift
-//  MyAwesomeProject
+//  ECNU-Timetable-ics
 //
 //  Created by JJAYCHEN on 2020/3/5.
 //

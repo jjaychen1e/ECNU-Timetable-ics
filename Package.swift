@@ -4,7 +4,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "MyAwesomeProject",
+    name: "ECNU-Timetable-ics",
     platforms: [
         .macOS(.v10_12), .iOS(.v11),
     ],
@@ -15,7 +15,7 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "MyAwesomeProject",
+            name: "ECNU-Timetable-ics",
             dependencies: ["PerfectHTTPServer", "Kanna", "Alamofire"]),
     ]
 )

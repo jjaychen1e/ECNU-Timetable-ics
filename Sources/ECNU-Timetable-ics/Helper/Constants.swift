@@ -11,8 +11,8 @@ import Foundation
 
 /// Required Packages: pytesseract, PIL
 /// brew install tesseract(macOS)
-let PYTHON3_PATH = "/Library/Frameworks/Python.framework/Versions/3.8/bin/python3.8"
-let TESSERACT_PATH = "/usr/local/bin/tesseract"
+let PYTHON3_PATH = "python3"
+let TESSERACT_PATH = "tesseract"
 let TEMP_PREXFIX = "/Users/jjaychen/Desktop"
 let RECOGNIZE_PATH = TEMP_PREXFIX + "/recognize.py"
 

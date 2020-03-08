@@ -4,24 +4,14 @@
 //  Created by JJAYCHEN on 2020/3/2.
 //
 
-
-// macOS
-//$ brew install libxml2
-//$ brew link --force libxml2
-//
-// Linux(Ubuntu)
-//$ sudo apt-get install libxml2-dev
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 import Foundation
 import PerfectLib
-import Alamofire
 import JavaScriptCore
 import Kanna
-
-
-let header: HTTPHeaders = [
-    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.122 Safari/537.36"
-]
 
 struct Course {
     let courseID: String
@@ -40,9 +30,18 @@ let calendar = Calendar.current
 var semesterBeginDate: Date?
 var semesterBeginDateComp: DateComponents?
 
+let config = URLSessionConfiguration.default
+let session = URLSession(configuration: config)
+
 // MARK: Login functions
 
 func getICSPath(username: String, password: String, year: Int, semesterIndex: Int) -> ResultEntity {
+    
+    config.httpAdditionalHeaders = [
+        "Accept" : "application/json",
+        "Content-Type" : "application/x-www-form-urlencoded"
+    ]
+    
     let loginStatus = login(username: username, password: password)
     
     guard loginStatus == .成功 else {
@@ -58,7 +57,7 @@ func getICSPath(username: String, password: String, year: Int, semesterIndex: In
     let semesterID = String(getSemesterID(year: year, semesterIndex: semesterIndex))
     
     let courses = getCourseInfoList(semesterID: semesterID, ids: ids)
-
+    
     guard courses.count > 0 else {
         return ResultEntity.fail(message: "课程列表获取失败")
     }
@@ -78,11 +77,13 @@ func getICSPath(username: String, password: String, year: Int, semesterIndex: In
 
 func login(username: String, password: String) -> LoginStatus {
     print("登录中")
-    AF.request(PORTAL_URL, headers: header).response(queue: .global()){
-        response in
+    var request = URLRequest(url: URL(string: PORTAL_URL)!)
+    URLSession.shared.dataTask(with: request) {
+        data, response, error in
         defer{semaphore.signal()}
+        
         print("Entered portal page.")
-    }
+    }.resume()
     
     semaphore.wait()
     
@@ -98,14 +99,18 @@ func login(username: String, password: String) -> LoginStatus {
         "lt": "LT-1665926-4VCedaEUwbuDuAPI7sKSRACHmInAcl-cas",
         "execution": "e1s1",
         "_eventId": "submit"
-        ]
+    ]
     
     var status: LoginStatus?
     
-    AF.request(PORTAL_URL, method: .post, parameters: postData).responseString(queue: .global()) {
-        response in
+    request = URLRequest(url: URL(string: PORTAL_URL)!)
+    request.encodeParameters(parameters: postData)
+    
+    URLSession.shared.dataTask(with: request) {
+        data, response, error in
         defer{semaphore.signal()}
-        if let content = response.value {
+        
+        if let data = data, let content = String(data: data, encoding: .utf8) {
             if let doc = try? HTML(html: content, encoding: .utf8) {
                 for err in doc.xpath("//*[@id='errormsg']") {
                     switch err.text {
@@ -125,8 +130,8 @@ func login(username: String, password: String) -> LoginStatus {
         } else {
             status = LoginStatus.未知错误
         }
-    }
-
+    }.resume()
+    
     semaphore.wait()
     
     defer{print("登录完毕: \(status?.toString() ?? "")")}
@@ -143,16 +148,18 @@ func getCaptcha() -> String{
     /// Save Captacha to file system.
     var code = "8888"
     
-    AF.request(CAPTCHA_URL).responseData(queue: .global()) {
-        response in
+    var request = URLRequest(url: URL(string: CAPTCHA_URL)!)
+    URLSession.shared.dataTask(with: request) {
+        data, response, error in
         defer{semaphore.signal()}
+        
         do {
             let path = CAPTCHA_PATH // 取一个随机名
             let captchaURL = URL(fileURLWithPath: path)
             
-            try response.value?.write(to: captchaURL)
+            try data!.write(to: captchaURL)
             print("Captacha saved: \(path)")
-
+            
             // 利用 Python 识别
             code = runCommand(launchPath: PYTHON3_PATH,
                               arguments: [MODULE_PATH,
@@ -162,11 +169,10 @@ func getCaptcha() -> String{
             /// 删除已经识别的验证码
             let fileManager = FileManager.default
             try fileManager.removeItem(at: captchaURL)
-        }
-        catch {
+        } catch {
             fatalError("\(error)")
         }
-    }
+    }.resume()
     
     semaphore.wait()
     
@@ -183,7 +189,7 @@ func getRSA(username: String, password: String) -> String {
     let squareFunc = context.objectForKeyedSubscript("strEnc")
     
     let rsa = squareFunc?.call(withArguments: [username + password, "1", "2", "3"]).toString() ?? ""
-
+    
     return rsa
 }
 
@@ -207,10 +213,12 @@ func getIDS() -> String{
     print("获取 IDS 中")
     var ids = ""
     
-    AF.request(IDS_URL).responseString(queue: .global()) {
-        response in
+    var request = URLRequest(url: URL(string: IDS_URL)!)
+    URLSession.shared.dataTask(with: request) {
+        data, response, error in
         defer{semaphore.signal()}
-        if let content = response.value {
+        
+        if let data = data, let content = String(data: data, encoding: .utf8) {
             let re = try! NSRegularExpression(pattern: "bg\\.form\\.addInput\\(form,\"ids\",\"[0-9]*", options: [])
             if let match = re.firstMatch(in: content, options: [], range: NSRange(location: 0, length: content.count)) {
                 let re = try! NSRegularExpression(pattern: "[0-9]+", options: [])
@@ -220,7 +228,7 @@ func getIDS() -> String{
                 }
             }
         }
-    }
+    }.resume()
     
     semaphore.wait()
     
@@ -235,7 +243,7 @@ func getCourseInfoList(semesterID: String, ids: String) -> [Course] {
     var courseName: [String] = []
     var courseInstructor: [String] = []
     var courses: [Course] = []
-
+    
     let postData = [
         "ignoreHead": "1",
         "setting.kind": "std",
@@ -244,10 +252,13 @@ func getCourseInfoList(semesterID: String, ids: String) -> [Course] {
         "ids": ids
     ]
     
-    AF.request(COURSE_TABLE_URL, method: .post, parameters: postData).responseString(queue: .global()) {
-        response in
+    var request = URLRequest(url: URL(string: COURSE_TABLE_URL)!)
+    request.encodeParameters(parameters: postData)
+    URLSession.shared.dataTask(with: request) {
+        data, response, error in
         defer{semaphore.signal()}
-        if let content = response.value {
+        
+        if let data = data, let content = String(data: data, encoding: .utf8) {
             /// 获取课程代号
             var re = try! NSRegularExpression(pattern: "<td>[A-Z]{4}[0-9]{10}\\..{2}</td>", options: [])
             for match in re.matches(in: content, options: [], range: NSRange(location: 0, length: content.count)) {
@@ -283,7 +294,7 @@ func getCourseInfoList(semesterID: String, ids: String) -> [Course] {
                 courseInstructor.append(substring)
             }
         }
-    }
+    }.resume()
     
     semaphore.wait()
     
@@ -330,12 +341,13 @@ func getICSEvent(for course: Course, with postData: [String:String]) -> [ICSEven
     let semaphore = DispatchSemaphore(value: 0)
     var events: [ICSEvent] = []
     
-    AF.request(COURSE_QUERY_URL, method: .post, parameters: postData).responseString(queue: .global()) {
-        response in
-        
+    var request = URLRequest(url: URL(string: COURSE_QUERY_URL)!)
+    request.encodeParameters(parameters: postData)
+    URLSession.shared.dataTask(with: request) {
+        data, response, error in
         defer{semaphore.signal()}
         
-        if let content = response.value {
+        if let data = data, let content = String(data: data, encoding: .utf8) {
             /// 获取星期
             var re = try! NSRegularExpression(pattern: "<td>星期.*</td>", options: [])
             if let match = re.firstMatch(in: content, options: [], range: NSRange(location: 0, length: content.count)){
@@ -433,7 +445,7 @@ func getICSEvent(for course: Course, with postData: [String:String]) -> [ICSEven
                 }
             }
         }
-    }
+    }.resume()
     
     semaphore.wait()
     

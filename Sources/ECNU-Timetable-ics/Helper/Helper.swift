@@ -11,7 +11,7 @@ import Foundation
 // MARK: Helper functions
 
 func generateRecognizePy() {
-    let content = """
+    var content = """
         import pytesseract
         import sys
         from PIL import Image
@@ -21,6 +21,7 @@ func generateRecognizePy() {
 
         pytesseract.pytesseract.tesseract_cmd = tesseract_path
         print(pytesseract.image_to_string(img), end='')
+
         """
     
     do {
@@ -28,6 +29,30 @@ func generateRecognizePy() {
     } catch {
         fatalError("\(error)")
     }
+    
+    #if os(Linux)
+    
+    content = """
+    import execjs
+    import sys
+    input = Image.open(sys.argv[1])
+    
+    desCode = \"\"\"
+    \(desCode)
+    \"\"\"
+
+    desJS = execjs.compile(desCode)
+    print(desJS.call('strEnc', input, '1', '2', '3'), end='')
+    
+    """
+    
+    do {
+        try content.write(to: URL(fileURLWithPath: TEMP_PREXFIX + "/getRSA.py"), atomically: true, encoding: String.Encoding.utf8)
+    } catch {
+        fatalError("\(error)")
+    }
+    
+    #endif
 }
 
 func runCommand(launchPath: String, arguments: [String]) -> String {
@@ -45,25 +70,25 @@ func runCommand(launchPath: String, arguments: [String]) -> String {
 }
 
 extension URLRequest {
-  
-  private func percentEscapeString(_ string: String) -> String {
-    var characterSet = CharacterSet.alphanumerics
-    characterSet.insert(charactersIn: "-._* ")
     
-    return string
-      .addingPercentEncoding(withAllowedCharacters: characterSet)!
-      .replacingOccurrences(of: " ", with: "+")
-      .replacingOccurrences(of: " ", with: "+", options: [], range: nil)
-  }
-  
-  mutating func encodeParameters(parameters: [String : String]) {
-    httpMethod = "POST"
-    
-    let parameterArray = parameters.map { (arg) -> String in
-      let (key, value) = arg
-      return "\(key)=\(self.percentEscapeString(value))"
+    private func percentEscapeString(_ string: String) -> String {
+        var characterSet = CharacterSet.alphanumerics
+        characterSet.insert(charactersIn: "-._* ")
+        
+        return string
+            .addingPercentEncoding(withAllowedCharacters: characterSet)!
+            .replacingOccurrences(of: " ", with: "+")
+            .replacingOccurrences(of: " ", with: "+", options: [], range: nil)
     }
     
-    httpBody = parameterArray.joined(separator: "&").data(using: String.Encoding.utf8)
-  }
+    mutating func encodeParameters(parameters: [String : String]) {
+        httpMethod = "POST"
+        
+        let parameterArray = parameters.map { (arg) -> String in
+            let (key, value) = arg
+            return "\(key)=\(self.percentEscapeString(value))"
+        }
+        
+        httpBody = parameterArray.joined(separator: "&").data(using: String.Encoding.utf8)
+    }
 }

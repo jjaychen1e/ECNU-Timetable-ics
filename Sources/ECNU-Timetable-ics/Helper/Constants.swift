@@ -14,7 +14,11 @@ import Foundation
 let PYTHON3_PATH = "/Library/Frameworks/Python.framework/Versions/3.8/bin/python3.8"
 let TESSERACT_PATH = "/usr/local/bin/tesseract"
 let TEMP_PREXFIX = "/Users/jjaychen/Desktop"
-let MODULE_PATH = TEMP_PREXFIX + "/recognize.py"
+let RECOGNIZE_PATH = TEMP_PREXFIX + "/recognize.py"
+
+#if os(Linux)
+let GETRSA_PATH = TEMP_PREXFIX + "/getRSA.py"
+#endif
 
 let PORTAL_URL = "https://portal1.ecnu.edu.cn/cas/login?service=http://portal.ecnu.edu.cn/neusoftcas.jsp"
 let CAPTCHA_URL = "https://portal1.ecnu.edu.cn/cas/code"

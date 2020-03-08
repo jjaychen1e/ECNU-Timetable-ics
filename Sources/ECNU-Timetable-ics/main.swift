@@ -20,6 +20,8 @@ do {
     
     let dateFormatter = DateFormatter()
     dateFormatter.dateFormat = "yyyy.MM.dd"
+    
+    // TODO: 设置开学时间
     semesterBeginDate = dateFormatter.date(from: "2020.03.09")!
     semesterBeginDateComp = calendar.dateComponents([.year, .month, .day], from: semesterBeginDate!)
     

@@ -8,24 +8,16 @@
 import FoundationNetworking
 #endif
 
+#if canImport(JavaScriptCore)
+import JavaScriptCore
+#endif
+
 import Foundation
 import PerfectLib
-import JavaScriptCore
 import Kanna
 
-struct Course {
-    let courseID: String
-    let courseName: String
-    let courseInstructor: String
-    
-    init(courseID: String, courseName: String, courseInstructor: String) {
-        self.courseID = courseID
-        self.courseName = courseName
-        self.courseInstructor = courseInstructor
-    }
-}
-
 let semaphore = DispatchSemaphore(value: 0)
+
 let calendar = Calendar.current
 var semesterBeginDate: Date?
 var semesterBeginDateComp: DateComponents?
@@ -162,7 +154,7 @@ func getCaptcha() -> String{
             
             // 利用 Python 识别
             code = runCommand(launchPath: PYTHON3_PATH,
-                              arguments: [MODULE_PATH,
+                              arguments: [RECOGNIZE_PATH,
                                           path,
                                           TESSERACT_PATH])
             
@@ -183,12 +175,20 @@ func getCaptcha() -> String{
 }
 
 func getRSA(username: String, password: String) -> String {
+    #if !os(Linux)
     let context: JSContext = JSContext()
     context.evaluateScript(desCode)
     
     let squareFunc = context.objectForKeyedSubscript("strEnc")
     
     let rsa = squareFunc?.call(withArguments: [username + password, "1", "2", "3"]).toString() ?? ""
+    #else
+    
+    let rsq = runCommand(launchPath: PYTHON3_PATH,
+                         arguments: [GETRSA_PATH,
+                                     username+password])
+    
+    #endif
     
     return rsa
 }

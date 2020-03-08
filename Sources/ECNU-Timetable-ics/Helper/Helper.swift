@@ -5,6 +5,10 @@
 //  Created by JJAYCHEN on 2020/3/5.
 //
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
 import Foundation
 
 

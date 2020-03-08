@@ -13,7 +13,7 @@ import Foundation
 /// brew install tesseract(macOS)
 let PYTHON3_PATH = "python3"
 let TESSERACT_PATH = "tesseract"
-let TEMP_PREXFIX = "/Users/jjaychen/Desktop"
+let TEMP_PREXFIX = "/home"
 let RECOGNIZE_PATH = TEMP_PREXFIX + "/recognize.py"
 
 #if os(Linux)

@@ -39,12 +39,12 @@ func generateRecognizePy() {
     content = """
     import execjs
     import sys
-    input = Image.open(sys.argv[1])
+    input = sys.argv[1]
     
     desCode = \"\"\"
     \(desCode)
     \"\"\"
-
+    
     desJS = execjs.compile(desCode)
     print(desJS.call('strEnc', input, '1', '2', '3'), end='')
     
@@ -64,12 +64,27 @@ func runCommand(launchPath: String, arguments: [String]) -> String {
     let file = pipe.fileHandleForReading
     
     let task = Process()
-    print(launchPath)
-    print(arguments)
-    task.launchPath = launchPath
+    
+    if #available(OSX 10.13, *) {
+        task.executableURL = URL(string: launchPath)!
+    } else {
+        task.launchPath = launchPath
+    }
     task.arguments = arguments
     task.standardOutput = pipe
-    task.launch()
+    
+    
+    if #available(OSX 10.13, *) {
+        do {
+            try task.run()
+        } catch {
+            print("\(error)")
+        }
+    } else {
+        task.launch()
+    }
+    
+    
     
     let data = file.readDataToEndOfFile()
     return String(data: data, encoding: String.Encoding.utf8)!

@@ -186,7 +186,7 @@ func getRSA(username: String, password: String) -> String {
     return rsa
     #else
     
-    let rsq = runCommand(launchPath: PYTHON3_PATH,
+    let rsa = runCommand(launchPath: PYTHON3_PATH,
                          arguments: [GETRSA_PATH,
                                      username+password])
     

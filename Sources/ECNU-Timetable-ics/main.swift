@@ -1,7 +1,6 @@
 import Foundation
 import PerfectHTTP
 import PerfectHTTPServer
-import Alamofire
 
 var routes = Routes()
 routes.add(method: .get, uri: "/") {

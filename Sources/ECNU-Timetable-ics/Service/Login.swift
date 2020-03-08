@@ -157,10 +157,11 @@ func getCaptcha() -> String{
                               arguments: [RECOGNIZE_PATH,
                                           path,
                                           TESSERACT_PATH])
-            
+            print("验证码识别完成")
             /// 删除已经识别的验证码
             let fileManager = FileManager.default
             try fileManager.removeItem(at: captchaURL)
+            print("验证码已删除")
         } catch {
             fatalError("\(error)")
         }

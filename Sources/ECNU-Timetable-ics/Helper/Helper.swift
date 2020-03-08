@@ -65,26 +65,24 @@ func runCommand(launchPath: String, arguments: [String]) -> String {
     
     let task = Process()
     
-    if #available(OSX 10.13, *) {
+    #if os(Linux)
         task.executableURL = URL(string: launchPath)!
-    } else {
+    #else
         task.launchPath = launchPath
-    }
+    #endif
+    
     task.arguments = arguments
     task.standardOutput = pipe
     
-    
-    if #available(OSX 10.13, *) {
+    #if os(Linux)
         do {
             try task.run()
         } catch {
             print("\(error)")
         }
-    } else {
+    #else
         task.launch()
-    }
-    
-    
+    #endif
     
     let data = file.readDataToEndOfFile()
     return String(data: data, encoding: String.Encoding.utf8)!

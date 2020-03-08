@@ -182,15 +182,16 @@ func getRSA(username: String, password: String) -> String {
     let squareFunc = context.objectForKeyedSubscript("strEnc")
     
     let rsa = squareFunc?.call(withArguments: [username + password, "1", "2", "3"]).toString() ?? ""
+    
+    return rsa
     #else
     
     let rsq = runCommand(launchPath: PYTHON3_PATH,
                          arguments: [GETRSA_PATH,
                                      username+password])
     
-    #endif
-    
     return rsa
+    #endif
 }
 
 /// Get semesterID from year and semesterIndex.

@@ -64,6 +64,8 @@ func runCommand(launchPath: String, arguments: [String]) -> String {
     let file = pipe.fileHandleForReading
     
     let task = Process()
+    print(launchPath)
+    print(arguments)
     task.launchPath = launchPath
     task.arguments = arguments
     task.standardOutput = pipe

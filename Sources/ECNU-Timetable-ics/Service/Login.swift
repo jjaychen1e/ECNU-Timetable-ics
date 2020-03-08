@@ -59,7 +59,7 @@ func getICSPath(username: String, password: String, year: Int, semesterIndex: In
     let icsCalendar = getICSCalendar(for: courses, with: calendarName, in: semesterID)
     
     do {
-        let content = try icsCalendar.toICSDescription().write(to: URL(fileURLWithPath: "/Users/jjaychen/Desktop/123.ics"), atomically: true, encoding: String.Encoding.utf8)
+        let content = try icsCalendar.toICSDescription().write(to: URL(fileURLWithPath: TEMP_PREXFIX + "/123.ics"), atomically: true, encoding: String.Encoding.utf8)
     } catch {
         fatalError("\(error)")
     }

@@ -50,13 +50,16 @@ func getICSPath(username: String, password: String, year: Int, semesterIndex: In
     
     let icsCalendar = getICSCalendar(for: courses, with: calendarName, in: semesterID)
     
+    let icsPath = TEMP_PREXFIX + "/\(username).ics"
+    
     do {
-        let content = try icsCalendar.toICSDescription().write(to: URL(fileURLWithPath: TEMP_PREXFIX + "/\(username).ics"), atomically: true, encoding: String.Encoding.utf8)
+        let content = try icsCalendar.toICSDescription().write(to: URL(fileURLWithPath: icsPath), atomically: true, encoding: String.Encoding.utf8)
+        print("文件已保存至: \(icsPath)")
     } catch {
         fatalError("\(error)")
     }
     
-    return ResultEntity.success(data: [:])
+    return ResultEntity.success(data: ["icsPath": icsPath])
 }
 
 func login(username: String, password: String) -> LoginStatus {
@@ -342,8 +345,8 @@ func getICSCalendar(for courses: [Course], with name: String, in semesterID: Str
 }
 
 func getICSEvent(for course: Course, with postData: [String:String]) -> [ICSEvent]{
-    print("为 \(course.courseName) 制作 ICSEvent 中")
-    defer{print("为 \(course.courseName) 制作 ICSEvent 完毕")}
+//    print("为 \(course.courseName) 制作 ICSEvent 中")
+//    defer{print("为 \(course.courseName) 制作 ICSEvent 完毕")}
     let semaphore = DispatchSemaphore(value: 0)
     var events: [ICSEvent] = []
     

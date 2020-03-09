@@ -22,17 +22,11 @@ let calendar = Calendar.current
 var semesterBeginDate: Date?
 var semesterBeginDateComp: DateComponents?
 
-let config = URLSessionConfiguration.default
-let session = URLSession(configuration: config)
-
 // MARK: Login functions
 
 func getICSPath(username: String, password: String, year: Int, semesterIndex: Int) -> ResultEntity {
     
-    config.httpAdditionalHeaders = [
-        "Accept" : "application/json",
-        "Content-Type" : "application/x-www-form-urlencoded"
-    ]
+    URLSession.shared.configuration.httpAdditionalHeaders = ["Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8"]
     
     let loginStatus = login(username: username, password: password)
     

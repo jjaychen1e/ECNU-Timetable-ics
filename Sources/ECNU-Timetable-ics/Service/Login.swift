@@ -98,7 +98,7 @@ func login(username: String, password: String) -> LoginStatus {
     URLSession.shared.dataTask(with: request) {
         data, response, error in
         defer{semaphore.signal()}
-        
+        print("正在登录")
         if let data = data, let content = String(data: data, encoding: .utf8) {
             if let doc = try? HTML(html: content, encoding: .utf8) {
                 for err in doc.xpath("//*[@id='errormsg']") {

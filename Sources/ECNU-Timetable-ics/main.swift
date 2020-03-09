@@ -15,6 +15,8 @@ routes.add(method: .get, uri: "/") {
 }
 
 do {
+    try FileManager.default.createDirectory(atPath: FileManager.default.currentDirectoryPath + "/tmp", withIntermediateDirectories: true, attributes: nil)
+    
     generateRecognizePy()
     
     let dateFormatter = DateFormatter()
@@ -30,4 +32,3 @@ do {
 } catch {
 	fatalError("\(error)") // fatal error launching one of the servers
 }
-

@@ -16,8 +16,6 @@ import Foundation
 import PerfectLib
 import Kanna
 
-let semaphore = DispatchSemaphore(value: 0)
-
 let calendar = Calendar.current
 var semesterBeginDate: Date?
 var semesterBeginDateComp: DateComponents?
@@ -53,7 +51,7 @@ func getICSPath(username: String, password: String, year: Int, semesterIndex: In
     let icsCalendar = getICSCalendar(for: courses, with: calendarName, in: semesterID)
     
     do {
-        let content = try icsCalendar.toICSDescription().write(to: URL(fileURLWithPath: TEMP_PREXFIX + "/123.ics"), atomically: true, encoding: String.Encoding.utf8)
+        let content = try icsCalendar.toICSDescription().write(to: URL(fileURLWithPath: TEMP_PREXFIX + "/\(username).ics"), atomically: true, encoding: String.Encoding.utf8)
     } catch {
         fatalError("\(error)")
     }
@@ -62,13 +60,15 @@ func getICSPath(username: String, password: String, year: Int, semesterIndex: In
 }
 
 func login(username: String, password: String) -> LoginStatus {
-    print("登录中")
+    print("正在准备登录")
+    let semaphore = DispatchSemaphore(value: 0)
+    
     var request = URLRequest(url: URL(string: PORTAL_URL)!)
     URLSession.shared.dataTask(with: request) {
         data, response, error in
         defer{semaphore.signal()}
         
-        print("Entered portal page.")
+        print("进入登录主页")
     }.resume()
     
     semaphore.wait()
@@ -109,6 +109,9 @@ func login(username: String, password: String) -> LoginStatus {
                     }
                     return
                 }
+                if let realName = doc.xpath("//a[contains(@title, \"查看登录记录\")]/font/text()").first?.text {
+                    print("用户名:" + realName)
+                }
                 status = LoginStatus.成功
             } else {
                 status = LoginStatus.未知错误
@@ -131,6 +134,8 @@ func login(username: String, password: String) -> LoginStatus {
 
 func getCaptcha() -> String{
     print("获取验证码中")
+    let semaphore = DispatchSemaphore(value: 0)
+    
     /// Save Captacha to file system.
     var code = "8888"
     
@@ -144,7 +149,7 @@ func getCaptcha() -> String{
             let captchaURL = URL(fileURLWithPath: path)
             
             try data!.write(to: captchaURL)
-            print("Captacha saved: \(path)")
+            print("验证码已保存: \(path)")
             
             // 利用 Python 识别
             code = runCommand(launchPath: PYTHON3_PATH,
@@ -207,6 +212,8 @@ func getSemesterID(year: Int, semesterIndex: Int) -> Int {
 
 func getIDS() -> String{
     print("获取 IDS 中")
+    let semaphore = DispatchSemaphore(value: 0)
+    
     var ids = ""
     
     var request = URLRequest(url: URL(string: IDS_URL)!)
@@ -234,6 +241,7 @@ func getIDS() -> String{
 
 func getCourseInfoList(semesterID: String, ids: String) -> [Course] {
     print("获取 CourseInfoList 中")
+    let semaphore = DispatchSemaphore(value: 0)
     
     var courseID: [String] = []
     var courseName: [String] = []
@@ -308,6 +316,8 @@ func getCourseInfoList(semesterID: String, ids: String) -> [Course] {
 
 func getICSCalendar(for courses: [Course], with name: String, in semesterID: String) -> ICSCalendar{
     print("制作 ICSCalandar 中")
+    let semaphore = DispatchSemaphore(value: 0)
+    
     defer{print("制作 ICSCalandar 完毕")}
     let calendar = ICSCalendar(name: name)
     

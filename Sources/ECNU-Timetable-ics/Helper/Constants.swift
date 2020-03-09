@@ -20,7 +20,7 @@ let RECOGNIZE_PATH = TEMP_PREXFIX + "/recognize.py"
 let GETRSA_PATH = TEMP_PREXFIX + "/getRSA.py"
 #endif
 
-let PORTAL_URL = "https://portal1.ecnu.edu.cn/cas/login?service=http://portal.ecnu.edu.cn/neusoftcas.jsp"
+let PORTAL_URL = "https://portal1.ecnu.edu.cn/cas/login?service=http://applicationnewjw.ecnu.edu.cn/eams/home.action"
 let CAPTCHA_URL = "https://portal1.ecnu.edu.cn/cas/code"
 let IDS_URL = "http://applicationnewjw.ecnu.edu.cn/eams/courseTableForStd!index.action"
 let COURSE_TABLE_URL = "http://applicationnewjw.ecnu.edu.cn/eams/courseTableForStd!courseTable.action"

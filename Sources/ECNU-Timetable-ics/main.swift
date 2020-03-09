@@ -10,8 +10,17 @@ routes.add(method: .get, uri: "/") {
     if let username = request.param(name: "username"),
         let password = request.param(name: "password")  {
         
-        getICSPath(username: username, password: password, year: 2019, semesterIndex: 2)
+        let result = getICSPath(username: username, password: password, year: 2019, semesterIndex: 2)
+        do {
+            try response.setBody(json: result)
+            response.completed()
+        } catch {
+            print("\(error)")
+        }
     }
+    
+    response.setBody(string: "failed")
+    response.completed()
 }
 
 do {

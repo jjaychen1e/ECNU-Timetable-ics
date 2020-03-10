@@ -24,15 +24,17 @@ var semesterBeginDateComp: DateComponents?
 
 func getICS(username: String, password: String, year: Int, semesterIndex: Int) -> ResultEntity {
     
-    URLSession.shared.configuration.httpAdditionalHeaders = ["Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8"]
+    let urlSessionConfiguration = URLSessionConfiguration.ephemeral
+    urlSessionConfiguration.httpAdditionalHeaders = ["Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8"]
+    let urlSession = URLSession(configuration: urlSessionConfiguration)
     
-    let loginStatus = login(username: username, password: password)
+    let loginStatus = login(username: username, password: password, session: urlSession)
     
     guard loginStatus == .成功 else {
         return ResultEntity.fail(message: loginStatus.toString())
     }
     
-    let ids = getIDS()
+    let ids = getIDS(session: urlSession)
     
     guard  ids != "" else {
         return ResultEntity.fail(message: "IDS 获取失败")
@@ -40,7 +42,7 @@ func getICS(username: String, password: String, year: Int, semesterIndex: Int) -
     
     let semesterID = String(getSemesterID(year: year, semesterIndex: semesterIndex))
     
-    let courses = getCourseInfoList(semesterID: semesterID, ids: ids)
+    let courses = getCourseInfoList(semesterID: semesterID, ids: ids, session: urlSession)
     
     guard courses.count > 0 else {
         return ResultEntity.fail(message: "课程列表获取失败")
@@ -48,7 +50,7 @@ func getICS(username: String, password: String, year: Int, semesterIndex: Int) -
     
     let calendarName = "\(year)-\(year+1) 学年\(索引转学期["\(semesterIndex)"]!)课表"
     
-    let icsCalendar = getICSCalendar(for: courses, with: calendarName, in: semesterID)
+    let icsCalendar = getICSCalendar(for: courses, with: calendarName, in: semesterID, session: urlSession)
     
     return ResultEntity.success(data: [
         "content": icsCalendar.toICSDescription(),
@@ -56,12 +58,12 @@ func getICS(username: String, password: String, year: Int, semesterIndex: Int) -
     ])
 }
 
-func login(username: String, password: String) -> LoginStatus {
+func login(username: String, password: String, session: URLSession) -> LoginStatus {
     print("正在准备登录")
     let semaphore = DispatchSemaphore(value: 0)
     
     var request = URLRequest(url: URL(string: PORTAL_URL)!)
-    URLSession.shared.dataTask(with: request) {
+    session.dataTask(with: request) {
         data, response, error in
         defer{semaphore.signal()}
         
@@ -70,7 +72,7 @@ func login(username: String, password: String) -> LoginStatus {
     
     semaphore.wait()
     
-    let code = getCaptcha()
+    let code = getCaptcha(session: session)
     
     let rsa = getRSA(username: username, password: password)
     
@@ -89,7 +91,7 @@ func login(username: String, password: String) -> LoginStatus {
     request = URLRequest(url: URL(string: PORTAL_URL)!)
     request.encodeParameters(parameters: postData)
     
-    URLSession.shared.dataTask(with: request) {
+    session.dataTask(with: request) {
         data, response, error in
         defer{semaphore.signal()}
         print("正在登录")
@@ -129,7 +131,7 @@ func login(username: String, password: String) -> LoginStatus {
     }
 }
 
-func getCaptcha() -> String{
+func getCaptcha(session: URLSession) -> String{
     print("获取验证码中")
     let semaphore = DispatchSemaphore(value: 0)
     
@@ -137,7 +139,7 @@ func getCaptcha() -> String{
     var code = "8888"
     
     var request = URLRequest(url: URL(string: CAPTCHA_URL)!)
-    URLSession.shared.dataTask(with: request) {
+    session.dataTask(with: request) {
         data, response, error in
         defer{semaphore.signal()}
         
@@ -208,14 +210,14 @@ func getSemesterID(year: Int, semesterIndex: Int) -> Int {
     return semesterID
 }
 
-func getIDS() -> String{
+func getIDS(session: URLSession) -> String{
     print("获取 IDS 中")
     let semaphore = DispatchSemaphore(value: 0)
     
     var ids = ""
     
     var request = URLRequest(url: URL(string: IDS_URL)!)
-    URLSession.shared.dataTask(with: request) {
+    session.dataTask(with: request) {
         data, response, error in
         defer{semaphore.signal()}
         
@@ -237,7 +239,7 @@ func getIDS() -> String{
     return ids
 }
 
-func getCourseInfoList(semesterID: String, ids: String) -> [Course] {
+func getCourseInfoList(semesterID: String, ids: String, session: URLSession) -> [Course] {
     print("获取 CourseInfoList 中")
     let semaphore = DispatchSemaphore(value: 0)
     
@@ -256,7 +258,7 @@ func getCourseInfoList(semesterID: String, ids: String) -> [Course] {
     
     var request = URLRequest(url: URL(string: COURSE_TABLE_URL)!)
     request.encodeParameters(parameters: postData)
-    URLSession.shared.dataTask(with: request) {
+    session.dataTask(with: request) {
         data, response, error in
         defer{semaphore.signal()}
         
@@ -312,7 +314,7 @@ func getCourseInfoList(semesterID: String, ids: String) -> [Course] {
     return courses
 }
 
-func getICSCalendar(for courses: [Course], with name: String, in semesterID: String) -> ICSCalendar{
+func getICSCalendar(for courses: [Course], with name: String, in semesterID: String, session: URLSession) -> ICSCalendar{
     print("制作 ICSCalandar 中")
     let semaphore = DispatchSemaphore(value: 0)
     
@@ -327,7 +329,7 @@ func getICSCalendar(for courses: [Course], with name: String, in semesterID: Str
                 "lesson.no": course.courseID
             ]
             
-            let events = getICSEvent(for: course, with: postData)
+            let events = getICSEvent(for: course, with: postData, session: session)
             calendar.append(events: events)
         }
     }
@@ -339,7 +341,7 @@ func getICSCalendar(for courses: [Course], with name: String, in semesterID: Str
     return calendar
 }
 
-func getICSEvent(for course: Course, with postData: [String:String]) -> [ICSEvent]{
+func getICSEvent(for course: Course, with postData: [String:String], session: URLSession) -> [ICSEvent]{
 //    print("为 \(course.courseName) 制作 ICSEvent 中")
 //    defer{print("为 \(course.courseName) 制作 ICSEvent 完毕")}
     let semaphore = DispatchSemaphore(value: 0)
@@ -347,7 +349,7 @@ func getICSEvent(for course: Course, with postData: [String:String]) -> [ICSEven
     
     var request = URLRequest(url: URL(string: COURSE_QUERY_URL)!)
     request.encodeParameters(parameters: postData)
-    URLSession.shared.dataTask(with: request) {
+    session.dataTask(with: request) {
         data, response, error in
         defer{semaphore.signal()}
         

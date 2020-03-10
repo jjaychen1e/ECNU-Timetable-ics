@@ -4,7 +4,11 @@ This project is based on `Swift Package Manager`.
 
 ## Deploy
 
+This project is base on [Swift Package Manager](https://swift.org/package-manager/).
+
 ### Install Swift
+
+Follow the instruction in [swift.org](https://swift.org/getting-started/).
 
 ### Build
 
@@ -16,4 +20,4 @@ This project is based on `Swift Package Manager`.
 
 ## Roadmap
 
-Migrate to Linux.(Unfortunately, Alamofire not supports Linux now..)
+- [x] ~~Migrate to Linux.(Unfortunately, Alamofire not supports Linux now..)~~ (Fortunately, URLSession provided by FoundationNetworking now works on Linux with `Swift 5`)

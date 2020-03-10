@@ -1,5 +1,5 @@
 //
-//  Login.swift
+//  GetICS.swift
 //
 //  Created by JJAYCHEN on 2020/3/2.
 //
@@ -22,7 +22,7 @@ var semesterBeginDateComp: DateComponents?
 
 // MARK: Login functions
 
-func getICSPath(username: String, password: String, year: Int, semesterIndex: Int) -> ResultEntity {
+func getICS(username: String, password: String, year: Int, semesterIndex: Int) -> ResultEntity {
     
     URLSession.shared.configuration.httpAdditionalHeaders = ["Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8"]
     
@@ -46,20 +46,14 @@ func getICSPath(username: String, password: String, year: Int, semesterIndex: In
         return ResultEntity.fail(message: "课程列表获取失败")
     }
     
-    let calendarName = "\(year)-\(year+1) 学年\(索引转学期["\(semesterIndex)"]!)"
+    let calendarName = "\(year)-\(year+1) 学年\(索引转学期["\(semesterIndex)"]!)课表"
     
     let icsCalendar = getICSCalendar(for: courses, with: calendarName, in: semesterID)
     
-    let icsPath = TEMP_PREXFIX + "/\(username).ics"
-    
-    do {
-        let content = try icsCalendar.toICSDescription().write(to: URL(fileURLWithPath: icsPath), atomically: true, encoding: String.Encoding.utf8)
-        print("文件已保存至: \(icsPath)")
-    } catch {
-        fatalError("\(error)")
-    }
-    
-    return ResultEntity.success(data: ["icsPath": icsPath])
+    return ResultEntity.success(data: [
+        "content": icsCalendar.toICSDescription(),
+        "filename": calendarName + ".ics"
+    ])
 }
 
 func login(username: String, password: String) -> LoginStatus {
@@ -152,18 +146,19 @@ func getCaptcha() -> String{
             let captchaURL = URL(fileURLWithPath: path)
             
             try data!.write(to: captchaURL)
-            print("验证码已保存: \(path)")
+//            print("验证码已保存: \(path)")
             
             // 利用 Python 识别
             code = runCommand(launchPath: PYTHON3_PATH,
                               arguments: [RECOGNIZE_PATH,
                                           path,
                                           TESSERACT_PATH])
-            print("验证码识别完成")
+//            print("验证码识别完成")
+            
             /// 删除已经识别的验证码
             let fileManager = FileManager.default
             try fileManager.removeItem(at: captchaURL)
-            print("验证码已删除")
+//            print("验证码已删除")
         } catch {
             fatalError("\(error)")
         }
@@ -337,7 +332,7 @@ func getICSCalendar(for courses: [Course], with name: String, in semesterID: Str
         }
     }
     
-    for i in 0..<courses.count {
+    for _ in 0..<courses.count {
         semaphore.wait()
     }
     

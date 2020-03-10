@@ -1,10 +1,9 @@
 # ECNU-Timetable-ics
 
-This project is based on `Swift Package Manager`.
+This project is based on [Swift Package Manager](https://swift.org/package-manager/).
 
 ## Deploy
 
-This project is base on [Swift Package Manager](https://swift.org/package-manager/).
 
 ### Install Swift
 

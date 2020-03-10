@@ -372,7 +372,7 @@ func getICSEvent(for course: Course, with postData: [String:String]) -> [ICSEven
                     let weekOffsetInAWeek = 星期转数字[week]
                     
                     /// 获取上课节数
-                    re = try! NSRegularExpression(pattern: "\\d-\\d", options: [])
+                    re = try! NSRegularExpression(pattern: "\\d{1,}-\\d{1,}", options: [])
                     let classOffsetMatch = re.firstMatch(in: line, options: [], range: lineRange)!
                     let classOffset = (line as NSString).substring(with: classOffsetMatch.range)
                     // e.g: 1-2 节
@@ -385,7 +385,7 @@ func getICSEvent(for course: Course, with postData: [String:String]) -> [ICSEven
                     var weekOffsetInASemester: [String] = []
                     
                     // 单周的课
-                    re = try! NSRegularExpression(pattern: "\\[\\d\\]", options: [])
+                    re = try! NSRegularExpression(pattern: "\\[\\d{1,}\\]", options: [])
                     for match in re.matches(in: line, options: [], range: lineRange) {
                         var substring = (line as NSString).substring(with: match.range)
                         
@@ -421,8 +421,8 @@ func getICSEvent(for course: Course, with postData: [String:String]) -> [ICSEven
                     
                     let beginHour = 开始上课时间[classStartTimeOffset]
                     let endHour = 结束上课时间[classEndTimeOffset]
-                    let beginMin = (Int(classStartTimeOffset)! % 2 == 0) ? 45 : 00
-                    let endMin = (Int(classEndTimeOffset)! % 2 == 0) ? 40 : 0
+                    let beginMin = (Int(classStartTimeOffset)! % 2 == 0) ? 55 : 00
+                    let endMin = (Int(classEndTimeOffset)! % 2 == 0) ? 40 : 45
                     var classTimeBeginDateComp = semesterBeginDateComp!
                     var classTimeEndDateComp = semesterBeginDateComp!
                     classTimeBeginDateComp.day! += weekOffsetInAWeek!

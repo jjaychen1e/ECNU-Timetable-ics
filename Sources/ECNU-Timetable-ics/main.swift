@@ -52,6 +52,7 @@ routes.add(method: .get, uri: "/") {
             response.completed()
             
             LogManager.saveResultLog(username: request.param(name: "username") ?? "nil", year: request.param(name: "year") ?? "nil", semesterIndex: request.param(name: "semesterIndex") ?? "nil", description: "成功", eventID: sessionID)
+            return
         }
     }
 

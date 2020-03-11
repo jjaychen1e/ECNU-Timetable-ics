@@ -22,12 +22,14 @@ class MySQLConnector {
         defer { mysql.close() }
         
         guard mysql.connect(host: databaseHost, user: databaseUser, password: databasePassword, db: databaseSchema) else {
+            LogManager.saveProcessLog(message: "数据库连接失败: \(mysql.errorMessage())", eventID: "-1")
             return (false, nil)
         }
 
         if mysql.query(statement: sql) {
-            return (true, mysql.storeResults()!)
+            return (true, mysql.storeResults() ?? nil)
         } else {
+            LogManager.saveProcessLog(message: "数据库 Query 失败: \(mysql.errorMessage())", eventID: "-1")
             return (false, nil)
         }
     }
@@ -63,9 +65,9 @@ class LogManager {
     static func saveResultLog(username: String, year: String, semesterIndex: String, description: String, eventID: String) {
         var yearSemesterDescription = ""
         if let yearInt = Int(year) {
-            yearSemesterDescription = "\(yearInt)-\(yearInt + 1) 学年第 \(semesterIndex) 学期)"
+            yearSemesterDescription = "\(yearInt)-\(yearInt + 1) 学年第 \(semesterIndex) 学期"
         } else {
-            yearSemesterDescription = "\(year) 学年第 \(semesterIndex) 学期)"
+            yearSemesterDescription = "\(year) 学年第 \(semesterIndex) 学期"
         }
         
         LogFile.info("\(username) 请求生成 \(yearSemesterDescription) 课程表结果为：\(description)", eventid: eventID, logFile: resultLogFilePath)
@@ -78,7 +80,7 @@ class LogManager {
     private static func saveRecord(username: String, year: String, semesterIndex: String, description: String) -> Bool{
         let sql = """
         INSERT INTO ecnu_ics_record(username, year, semester_index, description)
-        values(\(username), \(year), \(semesterIndex), \(description))
+        values(\"\(username)\", \"\(year)\", \"\(semesterIndex)\", \"\(description)\")
         """
         
         return MySQLConnector.query(statement: sql).isSuccess

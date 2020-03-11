@@ -6,9 +6,6 @@
 //
 import Foundation
 
-let processLogFilePath = "/var/log/ecnu-ics-process.log"
-let resultLogFilePath = "/var/log/ecnu-ics-result.log"
-
 /// Required Packages: pytesseract, PIL
 /// brew install tesseract(macOS)
 let PYTHON3_PATH = "/usr/local/bin/python3"
@@ -18,6 +15,11 @@ let RECOGNIZE_PATH = TEMP_PREXFIX + "/recognize.py"
 
 #if os(Linux)
 let GETRSA_PATH = TEMP_PREXFIX + "/getRSA.py"
+let processLogFilePath = "/var/log/ecnu-ics-process.log"
+let resultLogFilePath = "/var/log/ecnu-ics-result.log"
+#else
+let processLogFilePath = TEMP_PREXFIX + "/ecnu-ics-process.log"
+let resultLogFilePath = TEMP_PREXFIX + "/ecnu-ics-result.log"
 #endif
 
 /// Random file name with time and random Int value.

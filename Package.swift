@@ -11,11 +11,12 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/PerfectlySoft/Perfect-HTTPServer.git", from: "3.0.0"),
         .package(url: "https://github.com/PerfectlySoft/Perfect-MySQL.git", from: "3.0.0"),
+        .package(url: "https://github.com/PerfectlySoft/Perfect-Logger.git", from: "3.0.0"),
         .package(url: "https://github.com/tid-kijyun/Kanna.git", from: "5.0.0")
     ],
     targets: [
         .target(
             name: "ECNU-Timetable-ics",
-            dependencies: ["PerfectHTTPServer", "PerfectMySQL", "Kanna"]),
+            dependencies: ["PerfectHTTPServer", "PerfectMySQL", "PerfectLogger", "Kanna"]),
     ]
 )

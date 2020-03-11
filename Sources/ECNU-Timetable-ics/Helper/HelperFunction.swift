@@ -1,88 +1,86 @@
 //
-//  Constants.swift
+//  HelperFunction.swift
 //  ECNU-Timetable-ics
 //
 //  Created by JJAYCHEN on 2020/3/5.
 //
-
 import Foundation
 
-// MARK: URL/Path Constants
+// MARK: Helper functions
 
-/// Required Packages: pytesseract, PIL
-/// brew install tesseract(macOS)
-let PYTHON3_PATH = "/usr/local/bin/python3"
-let TESSERACT_PATH = "/usr/local/bin/tesseract"
-let TEMP_PREXFIX = "\(FileManager.default.currentDirectoryPath)/tmp"
-let RECOGNIZE_PATH = TEMP_PREXFIX + "/recognize.py"
+func generateHelperPy() {
+    var content = """
+        import pytesseract
+        import sys
+        from PIL import Image
 
-#if os(Linux)
-let GETRSA_PATH = TEMP_PREXFIX + "/getRSA.py"
-#endif
+        img = Image.open(sys.argv[1])
+        tesseract_path = sys.argv[2]
 
-let PORTAL_URL = "https://portal1.ecnu.edu.cn/cas/login?service=http://applicationnewjw.ecnu.edu.cn/eams/home.action"
-let CAPTCHA_URL = "https://portal1.ecnu.edu.cn/cas/code"
-let IDS_URL = "http://applicationnewjw.ecnu.edu.cn/eams/courseTableForStd!index.action"
-let COURSE_TABLE_URL = "http://applicationnewjw.ecnu.edu.cn/eams/courseTableForStd!courseTable.action"
-let COURSE_QUERY_URL = "http://applicationnewjw.ecnu.edu.cn/eams/publicSearch!search.action"
+        pytesseract.pytesseract.tesseract_cmd = tesseract_path
+        print(pytesseract.image_to_string(img), end='')
 
-/// Random file name with time and random Int value.
-/// Example: 2020-03-03-01-17-42-5-captacha.png
-var CAPTCHA_PATH: String {
-    let prefix = TEMP_PREXFIX
+        """
     
-    let dateformatter = DateFormatter()
-    dateformatter.dateFormat = "YYYY-MM-dd-HH-mm-ss"
-    let randomSuffic = String(Int.random(in: 0...10))
-    let suffix = dateformatter.string(from: Date()) + "-" + randomSuffic + "-captcha.png"
+    do {
+        try content.write(to: URL(fileURLWithPath: TEMP_PREXFIX + "/recognize.py"), atomically: true, encoding: String.Encoding.utf8)
+    } catch {
+        fatalError("\(error)")
+    }
     
-    return  prefix + "/" + suffix
+    #if os(Linux)
+    
+    content = """
+    import execjs
+    import sys
+    input = sys.argv[1]
+    
+    desCode = \"\"\"
+    \(desCode)
+    \"\"\"
+    
+    desJS = execjs.compile(desCode)
+    print(desJS.call('strEnc', input, '1', '2', '3'), end='')
+    
+    """
+    
+    do {
+        try content.write(to: URL(fileURLWithPath: TEMP_PREXFIX + "/getRSA.py"), atomically: true, encoding: String.Encoding.utf8)
+    } catch {
+        fatalError("\(error)")
+    }
+    
+    #endif
 }
 
-// MARK: Time Dictionary Constants
-let 星期转数字 = [
-    "星期一": 0,
-    "星期二": 1,
-    "星期三": 2,
-    "星期四": 3,
-    "星期五": 4,
-    "星期六": 5,
-    "星期日": 6,
-]
-
-let 开始上课时间 = [
-    "1": 8,
-    "2": 8,
-    "3": 10,
-    "4": 10,
-    "5": 13,
-    "6": 13,
-    "7": 15,
-    "8": 15,
-    "9": 18,
-    "10": 18,
-    "11": 20,
-]
-
-let 结束上课时间 = [
-    "1": 8,
-    "2": 9,
-    "3": 10,
-    "4": 11,
-    "5": 13,
-    "6": 14,
-    "7": 15,
-    "8": 16,
-    "9": 18,
-    "10": 19,
-    "11": 20,
-]
-
-let 索引转学期 = [
-    "1": "第一学期",
-    "2": "第二学期",
-    "3": "暑学期"
-]
+func runCommand(launchPath: String, arguments: [String]) -> String {
+    let pipe = Pipe()
+    let file = pipe.fileHandleForReading
+    
+    let task = Process()
+    
+    #if os(Linux)
+        task.executableURL = URL(string: launchPath)!
+    #else
+        task.launchPath = launchPath
+    #endif
+    
+    task.arguments = arguments
+    task.standardOutput = pipe
+    
+    #if os(Linux)
+        do {
+            try task.run()
+        } catch {
+            print("\(error)")
+        }
+    #else
+        task.launch()
+    #endif
+    
+    let data = file.readDataToEndOfFile()
+    return String(data: data, encoding: String.Encoding.utf8)!
+}
 
 // MARK: JavaScript Code
 

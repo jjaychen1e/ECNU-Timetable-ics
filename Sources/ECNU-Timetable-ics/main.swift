@@ -1,12 +1,15 @@
 import Foundation
 import PerfectHTTP
 import PerfectHTTPServer
+import PerfectMySQL
+import PerfectLogger
 
 var routes = Routes()
 routes.add(method: .get, uri: "/") {
 	request, response in
-    
     response.setHeader(.contentType, value: "application/json")
+    
+    let sessionID = MySQLConnector.getNextSessionID()
     
     if let username = request.param(name: "username"),
         let password = request.param(name: "password"),
@@ -14,38 +17,55 @@ routes.add(method: .get, uri: "/") {
         let semesterIndex = request.param(name: "semesterIndex"){
         
         if let year = Int(year), let semesterIndex = Int(semesterIndex) {
-            guard (1...3).contains(semesterIndex), (2000...9999).contains(year) else {
+            let today = Date()
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy"
+            let currentYear = Int(dateFormatter.string(from: today))!
+            
+            guard (1...3).contains(semesterIndex), (2019...currentYear).contains(year) else {
                 try! response.setBody(json: ResultEntity.fail(message: "学年或学期索引不正确"))
                 response.completed()
+                
+                LogManager.saveResultLog(username: request.param(name: "username") ?? "nil", year: request.param(name: "year") ?? "nil", semesterIndex: request.param(name: "semesterIndex") ?? "nil", description: "学年或学期索引不正确", eventID: sessionID)
+                
                 return
             }
             
-            let result = getICS(username: username, password: password, year: year, semesterIndex: semesterIndex)
+            let icsSession = CrawlICSSession(sessionID: sessionID, username: username, password: password, year: year, semesterIndex: semesterIndex)
+            
+            let result = icsSession.getICS()
             
             guard result.code == 0 else {
                 try! response.setBody(json: result)
                 response.completed()
+                
+                LogManager.saveResultLog(username: request.param(name: "username") ?? "nil", year: request.param(name: "year") ?? "nil", semesterIndex: request.param(name: "semesterIndex") ?? "nil", description: result.message, eventID: sessionID)
+                
                 return
             }
             
-            // So the brower can parse the .ics file.
+            // So that the brower can parse the .ics file.
             response.setHeader(.contentType, value: "text/calendar")
             response.setHeader(.contentDisposition,
                                value: "attachment; filename=\"\(result.data["filename"]!)\"")
             response.setBody(string: result.data["content"]!)
             response.completed()
+            
+            LogManager.saveResultLog(username: request.param(name: "username") ?? "nil", year: request.param(name: "year") ?? "nil", semesterIndex: request.param(name: "semesterIndex") ?? "nil", description: "成功", eventID: sessionID)
         }
     }
 
     response.setHeader(.contentEncoding, value: "")
-    try! response.setBody(json: ResultEntity.fail(message: "未提供学号，密码，学年或学期索引。"))
+    try! response.setBody(json: ResultEntity.fail(message: "未提供学号，密码，学年或学期索引"))
     response.completed()
+    
+    LogManager.saveResultLog(username: request.param(name: "username") ?? "nil", year: request.param(name: "year") ?? "nil", semesterIndex: request.param(name: "semesterIndex") ?? "nil", description: "未提供学号，密码，学年或学期索引", eventID: sessionID)
 }
 
 do {
     try FileManager.default.createDirectory(atPath: FileManager.default.currentDirectoryPath + "/tmp", withIntermediateDirectories: true, attributes: nil)
     
-    generateRecognizePy()
+    generateHelperPy()
     
     let dateFormatter = DateFormatter()
     dateFormatter.dateFormat = "yyyy.MM.dd"

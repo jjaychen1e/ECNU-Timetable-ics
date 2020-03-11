@@ -17,10 +17,6 @@ import PerfectLib
 import PerfectLogger
 import Kanna
 
-let calendar = Calendar.current
-var semesterBeginDate: Date?
-var semesterBeginDateComp: DateComponents?
-
 class CrawlICSSession {
     /// 若为 -1 代表数据库连接失败
     private let sessionID: String
@@ -34,6 +30,10 @@ class CrawlICSSession {
     private let year: Int
     
     private let semesterIndex: Int
+    
+    private let calendar = Calendar.current
+    
+    private let semesterBeginDateComp: DateComponents?
     
     private var _realName: String?
     
@@ -56,9 +56,23 @@ class CrawlICSSession {
         let urlSessionConfiguration = URLSessionConfiguration.ephemeral
         urlSessionConfiguration.httpAdditionalHeaders = ["Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8"]
         self.urlSession = URLSession(configuration: urlSessionConfiguration)
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy.MM.dd"
+        
+        ///设置开学时间
+        if let semesterBeginDate = dateFormatter.date(from: 开学日期[String(year)]![String(semesterIndex)]!) {
+            self.semesterBeginDateComp = calendar.dateComponents([.year, .month, .day], from: semesterBeginDate)
+        } else {
+            self.semesterBeginDateComp = nil
+        }
     }
     
     func getICS() -> ResultEntity {
+        if self.semesterBeginDateComp == nil {
+            return ResultEntity.fail(message: "该学年开学日期未设定，请联系作者手动更新")
+        }
+        
         let loginStatus = login()
         
         guard loginStatus == .成功 else {
@@ -68,7 +82,7 @@ class CrawlICSSession {
         let ids = getIDS()
         
         guard  ids != "" else {
-            return ResultEntity.fail(message: "\(realName): IDS 获取失败")
+            return ResultEntity.fail(message: "\(realName): IDS 获取失败，尝试重新运行")
         }
         
         let semesterID = String(getSemesterID(year: year, semesterIndex: semesterIndex))
@@ -76,7 +90,7 @@ class CrawlICSSession {
         let courses = getCourseInfoList(semesterID: semesterID, ids: ids)
         
         guard courses.count > 0 else {
-            return ResultEntity.fail(message: "\(realName): 课程列表获取失败")
+            return ResultEntity.fail(message: "\(realName): 课程列表获取失败，尝试重新运行")
         }
         
         let calendarName = "\(year)-\(year+1) 学年\(索引转学期["\(semesterIndex)"]!)课表"
@@ -477,8 +491,8 @@ class CrawlICSSession {
                         let endHour = 结束上课时间[classEndTimeOffset]
                         let beginMin = (Int(classStartTimeOffset)! % 2 == 0) ? 55 : 00
                         let endMin = (Int(classEndTimeOffset)! % 2 == 0) ? 40 : 45
-                        var classTimeBeginDateComp = semesterBeginDateComp!
-                        var classTimeEndDateComp = semesterBeginDateComp!
+                        var classTimeBeginDateComp = self.semesterBeginDateComp!
+                        var classTimeEndDateComp = self.semesterBeginDateComp!
                         classTimeBeginDateComp.day! += weekOffsetInAWeek!
                         classTimeEndDateComp.day! += weekOffsetInAWeek!
                         classTimeBeginDateComp.hour = beginHour
@@ -492,8 +506,8 @@ class CrawlICSSession {
                             classTimeBeginDateComp.day! += (Int(week)! - 1) * 7
                             classTimeEndDateComp.day! += (Int(week)! - 1) * 7
                             
-                            let classTimeBeginDate = calendar.date(from: classTimeBeginDateComp)
-                            let classTimeEndDate = calendar.date(from: classTimeEndDateComp)
+                            let classTimeBeginDate = self.calendar.date(from: classTimeBeginDateComp)
+                            let classTimeEndDate = self.calendar.date(from: classTimeEndDateComp)
                             
                             let event = ICSEvent(startDate: classTimeBeginDate!, endDate: classTimeEndDate!, title: course.courseName, location: location, note: course.courseInstructor)
                             event.setAlarm(alarm: ICSEventAlarm(trigger: 30))

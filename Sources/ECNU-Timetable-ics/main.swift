@@ -7,7 +7,7 @@ import PerfectLogger
 var routes = Routes()
 routes.add(method: .get, uri: "/") {
 	request, response in
-    response.setHeader(.contentType, value: "application/json")
+    response.setHeader(.contentType, value: "application/json; charset=UTF-8")
     
     let sessionID = MySQLConnector.getNextSessionID()
     
@@ -55,8 +55,7 @@ routes.add(method: .get, uri: "/") {
             return
         }
     }
-
-    response.setHeader(.contentEncoding, value: "")
+    
     try! response.setBody(json: ResultEntity.fail(message: "未提供学号，密码，学年或学期索引"))
     response.completed()
     
@@ -67,13 +66,6 @@ do {
     try FileManager.default.createDirectory(atPath: FileManager.default.currentDirectoryPath + "/tmp", withIntermediateDirectories: true, attributes: nil)
     
     generateHelperPy()
-    
-    let dateFormatter = DateFormatter()
-    dateFormatter.dateFormat = "yyyy.MM.dd"
-    
-    // TODO: 设置开学时间
-    semesterBeginDate = dateFormatter.date(from: "2020.03.09")!
-    semesterBeginDateComp = calendar.dateComponents([.year, .month, .day], from: semesterBeginDate!)
     
     // 启动HTTP服务器
     try HTTPServer.launch(

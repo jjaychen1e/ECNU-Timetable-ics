@@ -18,11 +18,11 @@ enum LoginStatus: Int {
         case .成功:
             return "成功"
         case .未知错误:
-            return "未知错误"
+            return "未知错误，尝试重新运行"
         case .用户名密码错误:
             return "用户名密码错误"
         case .验证码有误:
-            return "验证码有误"
+            return "验证码有误，尝试重新运行"
         }
     }
 }

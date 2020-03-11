@@ -11,7 +11,7 @@ import PerfectLogger
 
 let databaseHost = "127.0.0.1"
 let databaseUser = "root"
-let databasePassword = "Chen270499"
+let databasePassword = "default"
 let databaseSchema = "ecnu_ics_schema"
 let databaseTable = "ecnu_ics_table"
 

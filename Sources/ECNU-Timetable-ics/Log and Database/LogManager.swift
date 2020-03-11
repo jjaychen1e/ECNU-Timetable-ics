@@ -13,6 +13,7 @@ let databaseHost = "127.0.0.1"
 let databaseUser = "root"
 let databasePassword = "Chen270499"
 let databaseSchema = "ecnu_ics_schema"
+let databaseTable = "ecnu_ics_table"
 
 class MySQLConnector {
     static func query(statement sql: String) -> (isSuccess: Bool, results: MySQL.Results?) {
@@ -37,7 +38,7 @@ class MySQLConnector {
     static func getNextSessionID() -> String {
         let sql = """
         select auto_increment from information_schema.`TABLES`
-        where table_name='ecnu_ics_record'
+        where table_name='\(databaseTable)'
         """
         
         var nextID: String?
@@ -70,9 +71,12 @@ class LogManager {
             yearSemesterDescription = "\(year) 学年第 \(semesterIndex) 学期"
         }
         
+        
+        LogFile.info("\(username) 请求生成 \(yearSemesterDescription) 课程表结果为：\(description)", eventid: eventID, logFile: processLogFilePath)
         LogFile.info("\(username) 请求生成 \(yearSemesterDescription) 课程表结果为：\(description)", eventid: eventID, logFile: resultLogFilePath)
         
         if !saveRecord(username: username, year: year, semesterIndex: semesterIndex, description: description) {
+            LogFile.info("数据库记录结果失败", eventid: eventID, logFile: processLogFilePath)
             LogFile.info("数据库记录结果失败", eventid: eventID, logFile: resultLogFilePath)
         }
     }

@@ -39,7 +39,7 @@ routes.add(method: .get, uri: "/") {
                 try! response.setBody(json: result)
                 response.completed()
                 
-                LogManager.saveResultLog(username: request.param(name: "username") ?? "nil", year: request.param(name: "year") ?? "nil", semesterIndex: request.param(name: "semesterIndex") ?? "nil", description: result.message, eventID: sessionID)
+                LogManager.saveResultLog(username: icsSession.realName, year: request.param(name: "year") ?? "nil", semesterIndex: request.param(name: "semesterIndex") ?? "nil", description: result.message, eventID: sessionID)
                 
                 return
             }
@@ -51,7 +51,7 @@ routes.add(method: .get, uri: "/") {
             response.setBody(string: result.data["content"]!)
             response.completed()
             
-            LogManager.saveResultLog(username: request.param(name: "username") ?? "nil", year: request.param(name: "year") ?? "nil", semesterIndex: request.param(name: "semesterIndex") ?? "nil", description: "成功", eventID: sessionID)
+            LogManager.saveResultLog(username: icsSession.realName, year: request.param(name: "year") ?? "nil", semesterIndex: request.param(name: "semesterIndex") ?? "nil", description: "成功", eventID: sessionID)
             return
         }
     }
@@ -77,7 +77,7 @@ do {
     
     // 启动HTTP服务器
     try HTTPServer.launch(
-		.server(name: "ecnu-ics.jjaychen.me", port: 8181, routes: routes))
+		.server(name: "ecnu-ics.jjaychen.me", port: 80, routes: routes))
 } catch {
 	fatalError("\(error)") // fatal error launching one of the servers
 }

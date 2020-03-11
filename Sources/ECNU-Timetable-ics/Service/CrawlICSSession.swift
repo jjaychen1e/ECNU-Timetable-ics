@@ -35,6 +35,17 @@ class CrawlICSSession {
     
     private let semesterIndex: Int
     
+    private var _realName: String?
+    
+    var realName: String {
+        get {
+            _realName ?? username
+        }
+        set {
+            _realName = newValue
+        }
+    }
+    
     internal init(sessionID: String, username: String, password: String, year: Int, semesterIndex: Int) {
         self.sessionID = sessionID
         self.username = username
@@ -57,7 +68,7 @@ class CrawlICSSession {
         let ids = getIDS()
         
         guard  ids != "" else {
-            return ResultEntity.fail(message: "IDS 获取失败")
+            return ResultEntity.fail(message: "\(realName): IDS 获取失败")
         }
         
         let semesterID = String(getSemesterID(year: year, semesterIndex: semesterIndex))
@@ -65,7 +76,7 @@ class CrawlICSSession {
         let courses = getCourseInfoList(semesterID: semesterID, ids: ids)
         
         guard courses.count > 0 else {
-            return ResultEntity.fail(message: "课程列表获取失败")
+            return ResultEntity.fail(message: "\(realName): 课程列表获取失败")
         }
         
         let calendarName = "\(year)-\(year+1) 学年\(索引转学期["\(semesterIndex)"]!)课表"
@@ -79,7 +90,7 @@ class CrawlICSSession {
     }
 
     private func login() -> LoginStatus {
-        LogManager.saveProcessLog(message: "正在准备登录", eventID: sessionID)
+        LogManager.saveProcessLog(message: "\(sessionID)-\(realName): 正在准备登录", eventID: sessionID)
 //        print("正在准备登录")
         let semaphore = DispatchSemaphore(value: 0)
         
@@ -87,7 +98,7 @@ class CrawlICSSession {
         urlSession.dataTask(with: request) {
             data, response, error in
             defer{semaphore.signal()}
-            LogManager.saveProcessLog(message: "进入登录主页", eventID: self.sessionID)
+//            LogManager.saveProcessLog(message: "进入登录主页", eventID: self.sessionID)
 //            print("进入登录主页")
         }.resume()
         
@@ -115,7 +126,7 @@ class CrawlICSSession {
         urlSession.dataTask(with: request) {
             data, response, error in
             defer{semaphore.signal()}
-            LogManager.saveProcessLog(message: "正在登录", eventID: self.sessionID)
+            LogManager.saveProcessLog(message: "\(self.sessionID)-\(self.realName): 正在登录", eventID: self.sessionID)
 //            print("正在登录")
             if let data = data, let content = String(data: data, encoding: .utf8) {
                 if let doc = try? HTML(html: content, encoding: .utf8) {
@@ -131,7 +142,8 @@ class CrawlICSSession {
                         return
                     }
                     if let realName = doc.xpath("//a[contains(@title, \"查看登录记录\")]/font/text()").first?.text {
-                        LogManager.saveProcessLog(message: "用户名:" + realName, eventID: self.sessionID)
+                        LogManager.saveProcessLog(message: "\(self.sessionID)-\(self.realName): 用户名:" + realName, eventID: self.sessionID)
+                        self.realName = realName
 //                        print("用户名:" + realName)
                     }
                     status = LoginStatus.成功
@@ -146,21 +158,21 @@ class CrawlICSSession {
         semaphore.wait()
         
         defer{
-            LogManager.saveProcessLog(message: "登录完毕: \(status?.toString() ?? "")", eventID: sessionID)
+            LogManager.saveProcessLog(message: "\(self.sessionID)-\(self.realName): 登录完毕: \(status?.toString() ?? "")", eventID: sessionID)
 //            print("登录完毕: \(status?.toString() ?? "")")
         }
         
         if let status = status {
             return status
         } else {
-            LogManager.saveProcessLog(message: "登录超时", eventID: sessionID)
+            LogManager.saveProcessLog(message: "\(self.sessionID)-\(self.realName): 登录超时", eventID: sessionID)
 //            print("登录超时")
             return LoginStatus.未知错误
         }
     }
 
     private func getCaptcha() -> String{
-        LogManager.saveProcessLog(message: "获取验证码中", eventID: sessionID)
+        LogManager.saveProcessLog(message: "\(self.sessionID)-\(self.realName): 获取验证码中", eventID: sessionID)
 //        print("获取验证码中")
         let semaphore = DispatchSemaphore(value: 0)
         
@@ -198,7 +210,7 @@ class CrawlICSSession {
         semaphore.wait()
         
         defer {
-            LogManager.saveProcessLog(message: "获取验证码完毕: \(code)", eventID: sessionID)
+            LogManager.saveProcessLog(message: "\(self.sessionID)-\(self.realName): 获取验证码完毕: \(code)", eventID: sessionID)
 //            print("获取验证码完毕: \(code)")
         }
         return code
@@ -241,7 +253,7 @@ class CrawlICSSession {
     }
 
     private func getIDS() -> String{
-        LogManager.saveProcessLog(message: "获取 IDS 中", eventID: sessionID)
+        LogManager.saveProcessLog(message: "\(self.sessionID)-\(self.realName): 获取 IDS 中", eventID: sessionID)
 //        print("获取 IDS 中")
         let semaphore = DispatchSemaphore(value: 0)
         
@@ -266,13 +278,13 @@ class CrawlICSSession {
         
         semaphore.wait()
         
-        LogManager.saveProcessLog(message: "获取 IDS 完毕: \(ids)", eventID: sessionID)
+        LogManager.saveProcessLog(message: "\(self.sessionID)-\(self.realName): 获取 IDS 完毕: \(ids)", eventID: sessionID)
 //        print("获取 IDS 完毕: \(ids)")
         return ids
     }
 
     private func getCourseInfoList(semesterID: String, ids: String) -> [Course] {
-        LogManager.saveProcessLog(message: "获取 CourseInfoList 中", eventID: sessionID)
+        LogManager.saveProcessLog(message: "\(self.sessionID)-\(self.realName): 获取 CourseInfoList 中", eventID: sessionID)
 //        print("获取 CourseInfoList 中")
         let semaphore = DispatchSemaphore(value: 0)
         
@@ -344,19 +356,19 @@ class CrawlICSSession {
         }
         
         defer{
-            LogManager.saveProcessLog(message: "获取 \(courses.map{c in c.courseName}) 完毕", eventID: sessionID)
+            LogManager.saveProcessLog(message: "\(self.sessionID)-\(self.realName): 获取 \(courses.map{c in c.courseName}) 完毕", eventID: sessionID)
 //            print("获取 \(courses.map{c in c.courseName}) 完毕")
         }
         return courses
     }
 
     private func getICSCalendar(for courses: [Course], with name: String, in semesterID: String, session: URLSession) -> ICSCalendar{
-        LogManager.saveProcessLog(message: "制作 ICSCalendar 中", eventID: sessionID)
+        LogManager.saveProcessLog(message: "\(self.sessionID)-\(self.realName): 制作 ICSCalendar 中", eventID: sessionID)
 //        print("制作 ICSCalendar 中")
         let semaphore = DispatchSemaphore(value: 0)
         
         defer{
-            LogManager.saveProcessLog(message: "制作 ICSCalendar 完毕", eventID: sessionID)
+            LogManager.saveProcessLog(message: "\(self.sessionID)-\(self.realName): 制作 ICSCalendar 完毕", eventID: sessionID)
 //            print("制作 ICSCalendar 完毕")
         }
         let calendar = ICSCalendar(name: name)

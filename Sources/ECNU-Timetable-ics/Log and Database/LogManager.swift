@@ -13,7 +13,7 @@ let databaseHost = "127.0.0.1"
 let databaseUser = "root"
 let databasePassword = "default"
 let databaseSchema = "ecnu_ics_schema"
-let databaseTable = "ecnu_ics_table"
+let databaseTable = "ecnu_ics_record"
 
 class MySQLConnector {
     static func query(statement sql: String) -> (isSuccess: Bool, results: MySQL.Results?) {

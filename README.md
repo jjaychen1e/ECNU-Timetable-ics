@@ -2,7 +2,7 @@
 <p align="left">
 <img src="https://img.shields.io/badge/Swift-5.1-orange.svg?style=flat" alt="Swift 5.1">
 <img src="https://img.shields.io/badge/os-macOS-brightgreen.svg?style=flat" alt="macOS">
-<img src="https://img.shields.io/badge/os-linux-brightgreen.svg?style=flat" alt="Linux">
+<img src="https://img.shields.io/badge/os-Linux-brightgreen.svg?style=flat" alt="Linux">
 </p>
 
 This project is based on [Swift Package Manager](https://swift.org/package-manager/).

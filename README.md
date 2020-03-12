@@ -25,11 +25,15 @@ If Linux: `pip3 install PyExecJS`
 
 ### Install Swift
 
-Follow the instruction in [swift.org](https://swift.org/getting-started/).
+Follow the instructions in [swift.org](https://swift.org/getting-started/).
 
 ### Build
 
 `swift build`
+
+### Build and Run
+
+`swift run`
 
 ### Generate Xcode Project
 

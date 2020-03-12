@@ -23,6 +23,12 @@ Use brew on macOS.
 
 If Linux: `pip3 install PyExecJS`
 
+### Configuration
+
+You should set your own python/tesseract path in  `Helper/Config/PathConstants.swift`.
+
+The default path is: `/usr/local/bin/`.
+
 ### Install Swift
 
 Follow the instructions in [swift.org](https://swift.org/getting-started/).

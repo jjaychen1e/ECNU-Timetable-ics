@@ -24,4 +24,4 @@ Follow the instruction in [swift.org](https://swift.org/getting-started/).
 
 ## Roadmap
 
-- [x] ~~Migrate to Linux.(Unfortunately, Alamofire not supports Linux now..)~~ (Fortunately, URLSession provided by FoundationNetworking now works on Linux with `Swift 5`)
+- [x] Migrate to Linux.~~(Unfortunately, Alamofire not supports Linux now..)~~ (Fortunately, URLSession provided by FoundationNetworking now works on Linux with `Swift 5`)

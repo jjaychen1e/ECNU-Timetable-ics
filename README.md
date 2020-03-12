@@ -9,9 +9,16 @@ This project is based on [Swift Package Manager](https://swift.org/package-manag
 
 ## Deploy
 
+### Install Swift
+
+Follow the instructions in [swift.org](https://swift.org/getting-started/).
+
+
 ### Dependency
 
-Use brew on macOS.
+Install python first.
+
+(Use brew on macOS.)
 
 `sudo apt install tesseract-ocr`
 
@@ -28,10 +35,6 @@ If Linux: `pip3 install PyExecJS`
 You should set your own python/tesseract path in  `Helper/Config/PathConstants.swift`.
 
 The default path is: `/usr/local/bin/`.
-
-### Install Swift
-
-Follow the instructions in [swift.org](https://swift.org/getting-started/).
 
 ### Build
 

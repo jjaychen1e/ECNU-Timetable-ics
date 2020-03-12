@@ -9,6 +9,19 @@ This project is based on [Swift Package Manager](https://swift.org/package-manag
 
 ## Deploy
 
+### Dependency
+
+Use brew on macOS.
+
+`sudo apt install tesseract-ocr`
+
+`sudo apt install libtesseract-dev`
+
+`sudo apt-get install libxml2-dev`
+
+`pip3 install pytesseract`
+
+If Linux: `pip3 install PyExecJS`
 
 ### Install Swift
 

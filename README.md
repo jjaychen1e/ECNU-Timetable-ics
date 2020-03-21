@@ -42,6 +42,8 @@ You should set your own python/tesseract path in  `Helper/Config/PathConstants.s
 
 The default path is: `/usr/local/bin/`.
 
+The default mode is HTTPS now, you should set your cert path and key path in `Helper/Config/PathConstants.swift`. Or you can choose to uncomment the corresponding codes to run HTTP server in `main.swift`.
+
 ### Build
 
 `swift build`

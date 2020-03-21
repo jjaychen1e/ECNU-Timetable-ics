@@ -5,9 +5,10 @@ import PerfectMySQL
 import PerfectLogger
 
 var routes = Routes()
-routes.add(method: .get, uri: "/") {
+routes.add(method: .get, uri: "/ecnu-ics/get-ics") {
 	request, response in
-    response.setHeader(.contentType, value: "application/json; charset=UTF-8")
+    response.setHeader(.contentEncoding, value: "utf-8")
+    response.setHeader(.contentType, value: "application/json")
     
     let sessionID = MySQLConnector.getNextSessionID()
     

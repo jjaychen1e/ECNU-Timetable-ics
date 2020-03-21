@@ -28,7 +28,13 @@ Install python first.
 
 `pip3 install pytesseract`
 
-If Linux: `pip3 install PyExecJS`
+If Linux: 
+
+`sudo apt-get install openssl libssl-dev uuid-dev`
+
+`sudo apt-get install nodejs`
+
+`pip3 install PyExecJS`
 
 ### Configuration
 

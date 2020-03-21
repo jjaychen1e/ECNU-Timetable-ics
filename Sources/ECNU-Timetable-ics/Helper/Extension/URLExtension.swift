@@ -11,6 +11,7 @@ import FoundationNetworking
 
 import Foundation
 
+/// https://gist.github.com/HomerJSimpson/80c95f0424b8e9718a40
 extension URLRequest {
     private func percentEscapeString(_ string: String) -> String {
         var characterSet = CharacterSet.alphanumerics

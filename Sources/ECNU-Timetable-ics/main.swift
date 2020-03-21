@@ -4,6 +4,8 @@ import PerfectHTTPServer
 import PerfectMySQL
 import PerfectLogger
 
+let SERVER_NAME = "application.jjaychen.me"
+
 var routes = Routes()
 routes.add(method: .get, uri: "/ecnu-ics/get-ics") {
 	request, response in
@@ -68,9 +70,20 @@ do {
     
     generateHelperPy()
     
-    // 启动HTTP服务器
-    try HTTPServer.launch(
-		.server(name: "ecnu-ics.jjaychen.me", port: 80, routes: routes))
+    // 启动HTTPS服务器
+    let server = HTTPServer()
+    server.serverPort = 443
+    server.serverName = SERVER_NAME
+    server.addRoutes(routes)
+    server.ssl = (CERT_PATH, KEY_PATH)
+    server.certVerifyMode = .sslVerifyPeer
+
+    try server.start()
+    
+//    // 启动HTTP服务器
+//    try HTTPServer.launch(
+//        .server(name: "ecnu-ics.jjaychen.me", port: 80, routes: routes))
+    
 } catch {
 	fatalError("\(error)") // fatal error launching one of the servers
 }

@@ -6,8 +6,9 @@
 //
 import Foundation
 
-/// Required Packages: pytesseract, PIL
-/// brew install tesseract(macOS)
+let CERT_PATH = "/etc/letsencrypt/live/application.jjaychen.me/fullchain.pem"
+let KEY_PATH = "/etc/letsencrypt/live/application.jjaychen.me/privkey.pem"
+
 let PYTHON3_PATH = "/usr/local/bin/python3"
 let TESSERACT_PATH = "/usr/local/bin/tesseract"
 let TEMP_PREXFIX = "\(FileManager.default.currentDirectoryPath)/tmp"

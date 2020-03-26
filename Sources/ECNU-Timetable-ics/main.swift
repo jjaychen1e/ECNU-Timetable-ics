@@ -47,7 +47,7 @@ routes.add(method: .get, uri: "/ecnu-ics/get-ics") {
                 return
             }
             
-            // So that the brower can parse the .ics file.
+            // So that the browser can parse the .ics file.
             response.setHeader(.contentType, value: "text/calendar")
             response.setHeader(.contentDisposition,
                                value: "attachment; filename=\"\(result.data["filename"]!)\"")
